@@ -103,12 +103,15 @@ file_permissions(){
 		x=1
 		ex="Execute"
 	elif [ $ejecutar = "s" -a $propietario = "u" ]; then # Condicion para verificar el permiso SetUid.
+		x=1
  		setuid=4000
 		ex="SetUID"
 	elif [ $ejecutar = "s" -a $propietario = "g" ]; then # Condicion para verificar el permiso SetGid.
+		x=1
 		setgid=2000
 		ex="SetGID"
 	elif [ $ejecutar = "t" -a $propietario = "o" ]; then # Condicion para verificar el permiso Sticky Bit.
+		x=1	
 		sticky_bit=1000
 		ex="Sticky Bit"
 	fi
