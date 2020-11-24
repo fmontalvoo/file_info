@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# Esta funcion itera sobre los argumentos que reciba de entrada el script.
+file_iterator(){
+
+	args=$@
+
+	for arg in $args; do
+		file_info $arg
+	done
+
+	exit 0 # Emite un codigo de salida al finalizar el script.
+
+}
+
 # Esta funcion extrae los permisos que posee un determinado archivo.
 file_info(){
 
@@ -7,13 +20,14 @@ file_info(){
 
 	if [ -e $nombre ]; then # Verifica que el archivo exista.
 
-		sl=$(ls -ld $nombre)	        # Almacena la informacion del archivo. 
-		info=$(echo $sl | cut -c 1-10)	# Recupera informacion sobre el archivo y sus permisos. 
+		sl=$(ls -lhd $nombre)	           # Almacena la informacion del archivo. 
+		permisos=$(echo $sl | cut -c 1-10) # Recupera informacion sobre el archivo y sus permisos. 
+		info=$(echo $sl | cut -c 14-)      # Recupera los metadatos del archivo.
 
-		t="${info:0:1}"	# Recupera el tipo de archivo.
-		u="${info:1:3}"	# Recupera los permisos del usuario.
-		g="${info:4:3}"	# Recupera los permisos del grupo.
-		o="${info:7:3}"	# Recupera los permisos de otros.
+		t="${permisos:0:1}" # Recupera el tipo de archivo.
+		u="${permisos:1:3}" # Recupera los permisos del usuario.
+		g="${permisos:4:3}" # Recupera los permisos del grupo.
+		o="${permisos:7:3}" # Recupera los permisos de otros.
 		
 		tipo=$(file_type $t) # Almacena el tipo de archivo que devuelve la funcion.
 
@@ -21,11 +35,11 @@ file_info(){
 		grupo=$(file_permissions $g "g")   # Almacena los permisos del grupo.
 		otro=$(file_permissions $o "o")    # Almacena los permisos de otros.
 
-		echo -e "\nFile: $nombre\nType: $tipo\nPermissions: $u$g$o\n"
+		echo -e "\nFile: $nombre\nType: $tipo\nPermissions: $u$g$o"
+		echo -e "Info:\t     $info\n"
 		echo -e "User permissions:   $usuario\n"
 		echo -e "Group permissions:  $grupo\n"
 		echo -e "Others permissions: $otro\n"
-	
 	
 	else
 	
@@ -109,4 +123,4 @@ file_permissions(){
 
 }
 
-file_info $@
+file_iterator $@
