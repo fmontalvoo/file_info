@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Author Frank Montalvo Ochoa (fmontalvoo)
+
+#Colores
+greenColor="\e[0;32m\033[1m"
+redColor="\e[0;31m\033[1m"
+blueColor="\e[0;34m\033[1m"
+yellowColor="\e[0;33m\033[1m"
+purpleColor="\e[0;35m\033[1m"
+turquoiseColor="\e[0;36m\033[1m"
+grayColor="\e[0;37m\033[1m"
+endColor="\033[0m\e[0m"
+
 # Esta funcion itera sobre los argumentos que reciba de entrada el script.
 file_iterator(){
 
@@ -24,6 +36,13 @@ file_info(){
 		permisos=$(echo $sl | cut -c 1-10) # Recupera informacion sobre el archivo y sus permisos. 
 		info=$(echo $sl | cut -c 14-)      # Recupera los metadatos del archivo.
 
+		own_usr=$(echo $info | awk '{print $1}') # Usuario propietario
+		own_grp=$(echo $info | awk '{print $2}') # Grupo propietario
+		file_size=$(echo $info | awk '{print $3}') # Tamanno del archivo
+		mm=$(echo $info | awk '{print $4}') # Mes de creacion
+		dd=$(echo $info | awk '{print $5}') # Dia de creacion
+		hh=$(echo $info | awk '{print $6}') # Hora de creacion
+
 		t="${permisos:0:1}" # Recupera el tipo de archivo.
 		u="${permisos:1:3}" # Recupera los permisos del usuario.
 		g="${permisos:4:3}" # Recupera los permisos del grupo.
@@ -35,15 +54,21 @@ file_info(){
 		grupo=$(file_permissions $g "g")   # Almacena los permisos del grupo.
 		otro=$(file_permissions $o "o")    # Almacena los permisos de otros.
 
-		echo -e "\nFile: $nombre\nType: $tipo\nPermissions: $u$g$o"
-		echo -e "Info:\t     $info\n"
-		echo -e "User permissions:   $usuario\n"
-		echo -e "Group permissions:  $grupo\n"
-		echo -e "Others permissions: $otro\n"
+		echo -e "\n${greenColor}File${endColor}:\t\t     ${grayColor}$nombre${endColor}"
+		echo -e "${greenColor}Type${endColor}:\t\t     ${grayColor}$tipo${endColor}"
+		echo -e "${greenColor}Permissions${endColor}:\t     ${grayColor}$u$g$o${endColor}"
+		echo -e "${greenColor}Owner user${endColor}:\t     ${grayColor}$own_usr${endColor}"
+		echo -e "${greenColor}Owner group${endColor}:\t     ${grayColor}$own_grp${endColor}"
+		echo -e "${greenColor}File size${endColor}:\t     ${grayColor}$file_size${endColor}"
+		echo -e "${greenColor}Creation date${endColor}:\t     ${grayColor}$dd $mm $hh${endColor}\n"
+
+		echo -e "${yellowColor}User permissions:${endColor}   $usuario\n"
+		echo -e "${blueColor}Group permissions:${endColor}  $grupo\n"
+		echo -e "${redColor}Others permissions:${endColor} $otro\n"
 	
 	else
 	
-		echo "El archivo o directorio $nombre No existe."
+		echo -e "${redColor}El archivo o directorio${endColor} ${grayColor}$nombre${endColor} ${redColor}no existe.${endColor}"
 	
 	fi
 
@@ -91,38 +116,41 @@ file_permissions(){
 
 	if [ $leer = "r" ];then # Condicion para verificar que existe el permiso de lectura.
 		r=4
-		re="Read"
+		re="${yellowColor}Read${endColor}"
 	fi
 
 	if [ $escritura = "w" ]; then # Condicion para verificar que existe el permiso de escritura.
 		w=2
-		wr="Write"
+		wr="${blueColor}Write${endColor}"
 	fi
 
 	if [ $ejecutar = "x" ]; then # Condicion para verificar que existe el permiso de ejecucion.
 		x=1
-		ex="Execute"
+		ex="${redColor}Execute${endColor}"
 	elif [ $ejecutar = "s" -a $propietario = "u" ]; then # Condicion para verificar el permiso SetUid.
 		x=1
  		setuid=4000
-		ex="SetUID"
+		ex="${yellowColor}SetUID${endColor}"
 	elif [ $ejecutar = "s" -a $propietario = "g" ]; then # Condicion para verificar el permiso SetGid.
 		x=1
 		setgid=2000
-		ex="SetGID"
+		ex="${blueColor}SetGID${endColor}"
 	elif [ $ejecutar = "t" -a $propietario = "o" ]; then # Condicion para verificar el permiso Sticky Bit.
 		x=1	
 		sticky_bit=1000
-		ex="Sticky Bit"
+		ex="${redColor}Sticky Bit${endColor}"
 	fi
 
 	total=$(expr $r + $w + $x) # Suma los valores octales de cada permiso del archivo.
 
-	permisos="$re($leer) $wr($escritura) $ex($ejecutar)"  # Indica los permisos que se tiene sobre el archivo.
+	# Indica los permisos que se tiene sobre el archivo.
+	permisos="$re${grayColor}($leer)${endColor} $wr${grayColor}($escritura)${endColor} $ex${grayColor}($ejecutar)${endColor}"
 	
-	numerico=$(($setuid + $setgid + $sticky_bit + $r$w$x)) # Indica los valores octales individuales que corresponden a los permisos.
+	octal=$(($setuid + $setgid + $sticky_bit + $r$w$x)) # Indica los valores octales individuales que corresponden a los permisos.
 
-	echo -e "$permisos \n\t\t    Numeric: $numerico \n\t\t    Octal: $total"
+	echo -e "$permisos"
+	echo -e " \t\t    ${blueColor}Octal${endColor}: ${grayColor}$octal${endColor}"
+	echo -e " \t\t    ${redColor}Value${endColor}: ${grayColor}$total${endColor}"
 
 }
 
